@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="grpcServ.proto" />
+  </ItemGroup>
+  
+  <ItemGroup>
+	<PackageReference Include="Google.Protobuf" Version="3.14.0" />
+	<PackageReference Include="Grpc.Net.Client" Version="2.34.0-pre1" />
+	<PackageReference Include="Grpc.Tools" Version="2.34.0-pre1">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="5.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Protobuf Include="grpcServ.proto" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+</Project>

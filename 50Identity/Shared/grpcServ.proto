@@ -1,0 +1,37 @@
+﻿syntax="proto3";
+option csharp_namespace="grpcServisi";
+
+service GrpcIdentity {
+	rpc Registracija (RegMsg) returns (StandardReplyMsg);
+}
+
+message StandardReplyMsg {
+	bool Uspeh = 1;
+	oneof Err {
+		string Greska = 2;
+		EmptyMsg BasNista = 3;
+	}
+}
+
+message EmptyMsg {}
+
+message RegMsg {
+	string Username = 1;
+	string Password = 2;
+	oneof Tip{
+		KorisnikMsg Korisnik = 3;
+		ZaposlenMsg Zaposleni = 4;
+		bool Login = 5;
+	}
+}
+
+message KorisnikMsg {
+	string Ime = 1;
+	string Prezime = 2;
+}
+
+message ZaposlenMsg {
+	string Ime = 1;
+	string Prezime = 2;
+	string Pozicija = 3;
+}
