@@ -1,3 +1,6 @@
+using Grpc.Net.Client;
+using Grpc.Net.Client.Web;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -12,6 +15,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using grpcServisi;
 
 namespace Identity50.Client
 {
@@ -26,6 +30,17 @@ namespace Identity50.Client
 
 			builder.Services.AddApiAuthorization()
 				.AddAccountClaimsPrincipalFactory<RolesFactory>();
+
+            builder.Services.AddSingleton(sr =>
+            {
+                string srv = sr.GetRequiredService<NavigationManager>().BaseUri;
+                var httpKlijent = new HttpClient(new GrpcWebHandler(GrpcWebMode.GrpcWeb, new HttpClientHandler()));
+
+                var kanal = GrpcChannel.ForAddress(srv, new GrpcChannelOptions { HttpClient = httpKlijent });
+
+                return new grpcServisi.GrpcIdentity.GrpcIdentityClient(kanal);
+
+            });
 
 			await builder.Build().RunAsync();
 		}

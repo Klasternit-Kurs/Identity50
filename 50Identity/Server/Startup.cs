@@ -81,8 +81,11 @@ namespace Identity50.Server
 			app.UseAuthentication();
 			app.UseAuthorization();
 
+			app.UseGrpcWeb(new GrpcWebOptions {DefaultEnabled=true});
+
 			app.UseEndpoints(endpoints =>
 			{
+				endpoints.MapGrpcService<Servisi>();
 				endpoints.MapRazorPages();
 				endpoints.MapControllers();
 				endpoints.MapFallbackToFile("index.html");

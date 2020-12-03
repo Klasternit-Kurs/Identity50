@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace _50Identity.Server.Migrations
 {
     [DbContext(typeof(DBcon))]
-    [Migration("20201202220040_User")]
-    partial class User
+    [Migration("20201203220450_bla")]
+    partial class bla
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -149,6 +149,22 @@ namespace _50Identity.Server.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "8baaae29-1819-4f2a-8bf3-797c1c7a4bc2",
+                            ConcurrencyStamp = "ZKLJ",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "c985e024-df41-492e-988b-f992589ce5c8",
+                            ConcurrencyStamp = "ZKLJ",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -337,6 +353,16 @@ namespace _50Identity.Server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Korisnik");
+                });
+
+            modelBuilder.Entity("Identity50.Shared.Zaposlen", b =>
+                {
+                    b.HasBaseType("Identity50.Shared.Korisnik");
+
+                    b.Property<string>("Pozicija")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("Zaposlen");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

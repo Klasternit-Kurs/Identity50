@@ -3,6 +3,8 @@ option csharp_namespace="grpcServisi";
 
 service GrpcIdentity {
 	rpc Registracija (RegMsg) returns (StandardReplyMsg);
+	rpc LogIn (RegMsg) returns (StandardReplyMsg);
+	rpc LogOut (EmptyMsg) returns (EmptyMsg);
 }
 
 message StandardReplyMsg {

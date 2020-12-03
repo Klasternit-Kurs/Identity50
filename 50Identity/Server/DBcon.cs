@@ -18,5 +18,15 @@ namespace Identity50.Server
 
         public DbSet<Korisnik> Korisniks { get; set; }
         public DbSet<Zaposlen> Zaposlens { get; set; }
-    }
+
+		protected override void OnModelCreating(ModelBuilder builder)
+		{
+			base.OnModelCreating(builder);
+
+			builder.Entity<IdentityRole>().HasData(
+				new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Admin", NormalizedName = "ADMIN", ConcurrencyStamp = "ZKLJ" },
+				new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "User", NormalizedName = "USER", ConcurrencyStamp = "ZKLJ" }
+				);
+		}
+	}
 }

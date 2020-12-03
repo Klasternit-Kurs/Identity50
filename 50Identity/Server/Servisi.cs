@@ -14,11 +14,13 @@ namespace Identity50.Server
     {
 		private readonly ILogger<Servisi> _log;
 		private readonly UserManager<IdentityUser> _uman;
+		private readonly SignInManager<IdentityUser> _sim;
 
-		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um)
+		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um, SignInManager<IdentityUser> sim)
 		{
 			_log = log;
 			_uman = um;
+			_sim = sim;
 		}
 
 
@@ -49,7 +51,7 @@ namespace Identity50.Server
 
 
 			var rezultat = await _uman.CreateAsync(kor, request.Password);
-
+			
 			if (rezultat.Succeeded)
 				return new StandardReplyMsg { Uspeh = true };
 			else
@@ -67,6 +69,24 @@ namespace Identity50.Server
 			//{
 			//	sveGreske += greska + System.Environment.NewLine;
 			//}
+		}
+
+		public override async Task<StandardReplyMsg> LogIn(RegMsg request, ServerCallContext context)
+		{
+			if (!request.Login)
+				return new StandardReplyMsg { Uspeh = false, Greska = "Nije poruka za login :/" };
+			IdentityUser iu = await _uman.FindByNameAsync(request.Username);
+			var rez = await _sim.PasswordSignInAsync(iu, request.Password, false, false);
+			if (rez.Succeeded)
+				return new StandardReplyMsg { Uspeh = true };
+			else
+				return new StandardReplyMsg { Uspeh = false, Greska = "Bad user/pass" };
+		}
+
+		public override async Task<EmptyMsg> LogOut(EmptyMsg request, ServerCallContext context)
+		{
+			await _sim.SignOutAsync();
+			return new EmptyMsg();
 		}
 	}
 }
