@@ -4,14 +4,16 @@ using Identity50.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace _50Identity.Server.Migrations
 {
     [DbContext(typeof(DBcon))]
-    partial class DBconModelSnapshot : ModelSnapshot
+    [Migration("20201212174127_bla238")]
+    partial class bla238
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,9 +48,7 @@ namespace _50Identity.Server.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Ime")
-                        .IsUnique()
-                        .HasFilter("[Ime] IS NOT NULL");
+                    b.HasIndex("Ime");
 
                     b.ToTable("Autors");
                 });
@@ -65,9 +65,7 @@ namespace _50Identity.Server.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Naziv")
-                        .IsUnique()
-                        .HasFilter("[Naziv] IS NOT NULL");
+                    b.HasIndex("Naziv");
 
                     b.ToTable("Knjigas");
                 });
@@ -204,14 +202,14 @@ namespace _50Identity.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "884fe4cb-53d8-43ad-a2ed-60a86d3a85f9",
+                            Id = "042a221f-dd92-4179-963e-9a9a03711330",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "31fac436-7caf-4264-9a55-759bd3c5e814",
+                            Id = "43424242-5f5e-4054-9f6f-e654e8e4677e",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "User",
                             NormalizedName = "USER"

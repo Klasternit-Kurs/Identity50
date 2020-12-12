@@ -5,13 +5,27 @@ service GrpcIdentity {
 	rpc Registracija (RegMsg) returns (StandardReplyMsg);
 	rpc LogIn (RegMsg) returns (StandardReplyMsg);
 	rpc LogOut (EmptyMsg) returns (EmptyMsg);
+	rpc UnosKnjige (KnjigaMsg) returns (StandardReplyMsg);
+}
+
+message KnjigaMsg {
+	int32 ID = 1;
+	string Naziv = 2;
+	repeated AutorMsg Autori = 3;
+}
+
+message AutorMsg {
+	int32 ID = 1;
+	string Ime = 2;
+	repeated KnjigaMsg Knjige = 3;
 }
 
 message StandardReplyMsg {
 	bool Uspeh = 1;
 	oneof Err {
 		string Greska = 2;
-		EmptyMsg BasNista = 3;
+		KnjigaMsg Knjiga = 3;
+		EmptyMsg BasNista = 4;
 	}
 }
 

@@ -4,14 +4,16 @@ using Identity50.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace _50Identity.Server.Migrations
 {
     [DbContext(typeof(DBcon))]
-    partial class DBconModelSnapshot : ModelSnapshot
+    [Migration("20201212161848_bla23")]
+    partial class bla23
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,13 +44,9 @@ namespace _50Identity.Server.Migrations
                         .UseIdentityColumn();
 
                     b.Property<string>("Ime")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Ime")
-                        .IsUnique()
-                        .HasFilter("[Ime] IS NOT NULL");
 
                     b.ToTable("Autors");
                 });
@@ -61,13 +59,9 @@ namespace _50Identity.Server.Migrations
                         .UseIdentityColumn();
 
                     b.Property<string>("Naziv")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Naziv")
-                        .IsUnique()
-                        .HasFilter("[Naziv] IS NOT NULL");
 
                     b.ToTable("Knjigas");
                 });
@@ -204,14 +198,14 @@ namespace _50Identity.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "884fe4cb-53d8-43ad-a2ed-60a86d3a85f9",
+                            Id = "f2210318-fc84-4df4-9a4a-28a9ce3928b7",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "31fac436-7caf-4264-9a55-759bd3c5e814",
+                            Id = "c7c5dafc-f57b-4610-bc48-8651ffe50269",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "User",
                             NormalizedName = "USER"

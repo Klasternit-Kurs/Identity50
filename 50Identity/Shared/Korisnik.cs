@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using grpcServisi;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,48 @@ namespace Identity50.Shared
 	public class Zaposlen : Korisnik
 	{
 		public string Pozicija { get; set; }
+	}
+
+	public class Knjiga
+	{
+		public int ID { get; set; }
+		public string Naziv { get; set; }
+
+		public List<Autor> Autori { get; set; } = new List<Autor>();
+
+		public static implicit operator KnjigaMsg(Knjiga k)
+		{
+			var km = new KnjigaMsg {ID = k.ID, Naziv = k.Naziv };
+			k.Autori.ToList().ForEach(a => km.Autori.Add(a));
+			return km;
+		}
+
+		public static implicit operator Knjiga(KnjigaMsg km)
+		{
+			var k = new Knjiga { ID = km.ID, Naziv = km.Naziv };
+			km.Autori.ToList().ForEach(a => k.Autori.Add(a));
+			return k;
+		}
+	}
+
+	public class Autor
+	{
+		public int ID { get; set; }
+		public string Ime { get; set; }
+
+		public List<Knjiga> Knjige { get; set; } = new List<Knjiga>();
+
+		public static implicit operator AutorMsg(Autor a)
+		{
+			var am = new AutorMsg { ID = a.ID, Ime = a.Ime };
+			am.Knjige.ToList().ForEach(k => am.Knjige.Add(k));
+			return am;
+		}
+		public static implicit operator Autor(AutorMsg am)
+		{
+			var a = new Autor { ID = am.ID, Ime = am.Ime };
+			a.Knjige.ToList().ForEach(k => a.Knjige.Add(k));
+			return a;
+		}
 	}
 }

@@ -15,14 +15,52 @@ namespace Identity50.Server
 		private readonly ILogger<Servisi> _log;
 		private readonly UserManager<IdentityUser> _uman;
 		private readonly SignInManager<IdentityUser> _sim;
+		private DBcon Baza { get; init; }
 
-		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um, SignInManager<IdentityUser> sim)
+		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um, SignInManager<IdentityUser> sim, DBcon b)
 		{
 			_log = log;
 			_uman = um;
 			_sim = sim;
+			Baza = b;
 		}
 
+
+		public override async Task<StandardReplyMsg> UnosKnjige(KnjigaMsg request, ServerCallContext context)
+		{
+			var knji = Baza.Knjigas.Where(k => k.Naziv == request.Naziv).FirstOrDefault();
+			if (knji == null)
+			{
+				Knjiga knjiga = request;
+				List<Autor> aut = new List<Autor>();
+				request.Autori.ToList().ForEach(a =>
+				{
+					var autorBaza = Baza.Autors.Where(au => au.Ime == a.Ime).First();
+					if (autorBaza == null)
+						aut.Add(a);
+					else
+						aut.Add(autorBaza);
+				});
+				knjiga.Autori = aut;
+				knji = Baza.Knjigas.Add(knjiga).Entity;
+				await Baza.SaveChangesAsync();
+			} else
+			{
+				request.Autori.ToList().ForEach(a =>
+				{
+					var aut = Baza.Autors.Where(au => au.Ime == a.Ime).FirstOrDefault();
+					Autor autoZaKnjigu = null;
+					if (aut == null)
+					{
+						autoZaKnjigu = Baza.Autors.Add(a).Entity;
+						knji.Autori.Add(autoZaKnjigu);
+						Baza.SaveChanges();
+					}
+
+				});
+			}
+			return new StandardReplyMsg { Uspeh = true, Knjiga = knji };
+		}
 
 		public override async Task<StandardReplyMsg> Registracija(RegMsg request, ServerCallContext context)
 		{
@@ -51,9 +89,13 @@ namespace Identity50.Server
 
 
 			var rezultat = await _uman.CreateAsync(kor, request.Password);
-			
+
 			if (rezultat.Succeeded)
+			{
+				var usr = await _uman.FindByNameAsync(request.Username);
+				await _uman.AddToRoleAsync(usr, "Admin");
 				return new StandardReplyMsg { Uspeh = true };
+			}
 			else
 				return new StandardReplyMsg
 				{
