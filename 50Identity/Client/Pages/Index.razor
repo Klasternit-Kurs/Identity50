@@ -3,72 +3,45 @@
 @using grpcServisi
 @inject grpcServisi.GrpcIdentity.GrpcIdentityClient kli
 
-<AuthorizeView Roles="Admin">
-	<Authorized>
-		samo za admine
-	</Authorized>
-	<NotAuthorized>
-		Ostali juzeri
-	</NotAuthorized>
-</AuthorizeView>
-<AuthorizeView>
-	<Authorized>
-		Hej @context.User.Identity.Name
-		<button @onclick="Logout">Logout</button>
-	</Authorized>
-	<NotAuthorized>
-		@err
+<b>@_er</b>
+<input @bind-value="_naziv" />
+<button @onclick="Snimi">Unos</button>
 
-		<p>User<input @bind-value="User" /></p>
-		<p>Pass<input @bind-value="Pass" /></p>
-		<p>Ime<input @bind-value="Ime" /></p>
-		<p>Prezime<input @bind-value="Prezime" /></p>
-		<p>Pozicija</p><input @bind-value="Pozicija" />
-
-		<button @onclick="() => Registruj(true)">Reg kor</button>
-		<button @onclick="() => Registruj(false)">Reg zap</button>
-		<button @onclick="Login">Login</button>
-
-	</NotAuthorized>
-</AuthorizeView>
+<table style="width:100%">
+	<tr>
+		<th>ID</th>
+		<th>Naziv</th>
+	</tr>
+	@foreach (Artikal a in Artikals)
+	{
+		<tr>
+			<td>@a.ID</td>
+			<td>@a.Naziv</td>
+		</tr>
+	}
+</table>
 
 @code
 {
-	private string err;
+	private string _er;
+	private string _naziv;
+	List<Artikal> Artikals { get; set; } = new List<Artikal>();
 
-	private string Ime, Prezime, Pass, User, Pozicija;
-
-	private async void Registruj(bool korisnik)
+	private async void Snimi()
 	{
-		err = string.Empty;
-
-		RegMsg rm = new RegMsg { Username = User, Password = Pass };
-		if (korisnik)
-			rm.Korisnik = new KorisnikMsg { Ime = Ime, Prezime = Prezime };
-		else
-			rm.Zaposleni = new ZaposlenMsg { Ime = Ime, Prezime = Prezime, Pozicija = Pozicija };
-
-		var rez = await kli.RegistracijaAsync(rm);
-		
-		if (!rez.Uspeh)
-			err = rez.Greska;
-		StateHasChanged();
-		rm = new RegMsg { Korisnik = new KorisnikMsg(), Zaposleni = new ZaposlenMsg() };
-	}
-
-	private async void Login()
-	{
-		var rez = await kli.LogInAsync(new RegMsg { Username = User, Password = Pass, Login = true });
+		_er = string.Empty;
+		var rez = await kli.DodajArtikalAsync(new Artikal { Naziv = _naziv });
 		if (rez.Uspeh)
-			err = "Uspeh :D";
+		{
+			Artikals.Add(rez.Artikal);
+			StateHasChanged();
+		}
 		else
-			err = rez.Greska;
-		StateHasChanged();
+		{
+			_er = rez.Greska;
+			StateHasChanged();
+		}
 	}
 
-	private async void Logout()
-	{
-		await kli.LogOutAsync(new EmptyMsg());
-		StateHasChanged();
-	}
+	
 }

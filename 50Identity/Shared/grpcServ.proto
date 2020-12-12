@@ -1,10 +1,29 @@
 ﻿syntax="proto3";
 option csharp_namespace="grpcServisi";
 
+import "google/protobuf/timestamp.proto";
+
 service GrpcIdentity {
 	rpc Registracija (RegMsg) returns (StandardReplyMsg);
 	rpc LogIn (RegMsg) returns (StandardReplyMsg);
 	rpc LogOut (EmptyMsg) returns (EmptyMsg);
+
+	rpc DodajArtikal (ArtikalMsg) returns (StandardReplyMsg);
+	rpc NadjiArtikl (ArtikalMsg) returns (StandardReplyMsg);
+}
+
+message ArtikalMsg {
+	int32 ID = 1;
+	string Naziv = 2;
+}
+
+message RacunMsg {
+	message Lista {
+		map <string, string> Set = 1;
+	}
+	int32 Rbr = 1;
+	google.protobuf.Timestamp Izdavanje = 2;
+	repeated Lista lista = 3;
 }
 
 message StandardReplyMsg {
@@ -12,6 +31,7 @@ message StandardReplyMsg {
 	oneof Err {
 		string Greska = 2;
 		EmptyMsg BasNista = 3;
+		ArtikalMsg Artikal = 4;
 	}
 }
 

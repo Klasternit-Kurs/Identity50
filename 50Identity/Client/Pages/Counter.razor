@@ -1,16 +1,76 @@
 ﻿@page "/counter"
+@using Identity50.Shared
+@using grpcServisi
+@using Google.Protobuf.WellKnownTypes
+@inject grpcServisi.GrpcIdentity.GrpcIdentityClient kli
 
-<h1>Counter</h1>
+<b>@_er</b>
+<input @bind-value="_id" />
+<input @bind-value="_naziv" />
+<button @onclick="Dodaj">Unos</button>
+<button @onclick="Izdaj">Izdaj racun</button>
 
-<p>Current count: @currentCount</p>
+<table style="width:100%">
+	<tr>
+		<th>ID</th>
+		<th>Naziv</th>
+		<th>Kolicina</th>
+	</tr>
+	@foreach (Artikal a in Artikals.Keys)
+	{
+		<tr>
+			<td>@a.ID</td>
+			<td>@a.Naziv</td>
+			<td>@Artikals[a]</td>
+		</tr>
+	}
+</table>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@code
+{
+	private string _er;
+	private string _naziv = string.Empty;
+	private int _id;
+	Dictionary<Artikal, int> Artikals { get; set; } = new Dictionary<Artikal, int>();
 
-@code {
-    private int currentCount = 0;
+	private async void Dodaj()
+	{
+		_er = string.Empty;
+		var rez = await kli.NadjiArtiklAsync(new ArtikalMsg { ID = _id, Naziv = _naziv });
+		if (rez.Uspeh)
+		{
+			var kljuc = Artikals.Keys.Where(a => a.ID == rez.Artikal.ID).FirstOrDefault();
+			if (kljuc != null)
+				Artikals[kljuc]++;
+			else
+				Artikals.Add(rez.Artikal, 1);
+			StateHasChanged();
+		}
+		else
+		{
+			_er = rez.Greska;
+			StateHasChanged();
+		}
+	}
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+	private async void Izdaj()
+	{
+		_er = string.Empty;
+		if (!Artikals.Any())
+		{
+			_er = "Nema artikala!";
+			StateHasChanged();
+			return;
+		}
+
+		var rac = new RacunMsg { Izdavanje = Timestamp.FromDateTime(DateTime.Now) };
+
+		Dictionary<ArtikalMsg, int> tt = new Dictionary<ArtikalMsg, int>();
+
+
+		Dictionary<string, string> asd = new Dictionary<string, string>();
+		rac.Lista.Add(asd);
+	
+
+	}
 }

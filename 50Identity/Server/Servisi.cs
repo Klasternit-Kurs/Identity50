@@ -10,17 +10,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Identity50.Server
 {
-    public class Servisi : grpcServisi.GrpcIdentity.GrpcIdentityBase
-    {
+	public class Servisi : grpcServisi.GrpcIdentity.GrpcIdentityBase
+	{
 		private readonly ILogger<Servisi> _log;
 		private readonly UserManager<IdentityUser> _uman;
 		private readonly SignInManager<IdentityUser> _sim;
+		private DBcon Baza { get; init; }
 
-		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um, SignInManager<IdentityUser> sim)
+		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um, SignInManager<IdentityUser> sim, DBcon db)
 		{
 			_log = log;
 			_uman = um;
 			_sim = sim;
+			Baza = db;
 		}
 
 
@@ -32,8 +34,8 @@ namespace Identity50.Server
 				kor = new Korisnik
 				{
 					UserName = request.Username,
-					Ime = request.Korisnik.Ime, 
-					Prezime = request.Korisnik.Prezime 
+					Ime = request.Korisnik.Ime,
+					Prezime = request.Korisnik.Prezime
 				};
 			else if (request.TipCase == RegMsg.TipOneofCase.Zaposleni)
 				kor = new Zaposlen
@@ -51,7 +53,7 @@ namespace Identity50.Server
 
 
 			var rezultat = await _uman.CreateAsync(kor, request.Password);
-			
+
 			if (rezultat.Succeeded)
 				return new StandardReplyMsg { Uspeh = true };
 			else
@@ -87,6 +89,33 @@ namespace Identity50.Server
 		{
 			await _sim.SignOutAsync();
 			return new EmptyMsg();
+		}
+
+		public override async Task<StandardReplyMsg> DodajArtikal(ArtikalMsg request, ServerCallContext context)
+		{
+			if (request.ID == 0)
+			{
+				var art = Baza.Artikals.Add(request).Entity;
+				await Baza.SaveChangesAsync();
+				return new StandardReplyMsg { Uspeh = true, Artikal = art };
+			} else
+			{
+				return new StandardReplyMsg { Uspeh = false, Greska = "Artikal ima ID" };
+			}
+		}
+
+		public override Task<StandardReplyMsg> NadjiArtikl(ArtikalMsg request, ServerCallContext context)
+		{
+			var art = Baza.Artikals.Find(request.ID);
+			if (art != null)
+				return Task.FromResult(new StandardReplyMsg { Uspeh = true, Artikal = art });
+			else
+			{
+				art = Baza.Artikals.Where(a => a.Naziv == request.Naziv).FirstOrDefault();
+				if (art != null)
+					return Task.FromResult(new StandardReplyMsg { Uspeh = true, Artikal = art });
+			}
+			return Task.FromResult(new StandardReplyMsg { Uspeh = false, Greska = "Ne postoji!" });
 		}
 	}
 }

@@ -19,9 +19,30 @@ namespace Identity50.Server
         public DbSet<Korisnik> Korisniks { get; set; }
         public DbSet<Zaposlen> Zaposlens { get; set; }
 
+		public DbSet<Artikal> Artikals { get; set; }
+		public DbSet<Racun> Racuns { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
+
+			builder.Entity<Artikal>().HasKey(a => a.ID);
+			builder.Entity<Racun>().HasKey(r => r.Rbr);
+
+			builder.Entity<Racun>().HasMany(r => r.Artikals)
+								   .WithMany(a => a.Racuns)
+								   .UsingEntity<RacunArtikal>
+				(
+					ra => ra.HasOne(ra => ra.Artikal)
+							.WithMany(a => a.RAs)
+							.HasForeignKey(ra => ra.ArtikalFK),
+					ra => ra.HasOne(ra => ra.Racun)
+							.WithMany(r => r.RAs)
+							.HasForeignKey(ra => ra.RacunFK),
+					ra => ra.HasKey(ra => new { ra.ArtikalFK, ra.RacunFK })
+				);
+
+
 
 			builder.Entity<IdentityRole>().HasData(
 				new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Admin", NormalizedName = "ADMIN", ConcurrencyStamp = "ZKLJ" },
