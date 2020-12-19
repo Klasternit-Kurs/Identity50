@@ -4,14 +4,16 @@ using Identity50.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace _50Identity.Server.Migrations
 {
     [DbContext(typeof(DBcon))]
-    partial class DBconModelSnapshot : ModelSnapshot
+    [Migration("20201219171323_skjdhkdfg")]
+    partial class skjdhkdfg
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,13 +48,9 @@ namespace _50Identity.Server.Migrations
                         .UseIdentityColumn();
 
                     b.Property<string>("Naziv")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Naziv")
-                        .IsUnique()
-                        .HasFilter("[Naziv] IS NOT NULL");
 
                     b.ToTable("Knjigas");
                 });
@@ -207,14 +205,14 @@ namespace _50Identity.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f820999b-696a-4a66-9ee5-7bc7e90faebf",
+                            Id = "5912cea0-725c-495e-9f43-cd6170665cb9",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ebc4114c-cd59-49c6-b8c1-38ac03de6fc1",
+                            Id = "099e19a0-8d66-4dbb-a0ab-b788eeb59b32",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "User",
                             NormalizedName = "USER"

@@ -26,6 +26,7 @@ namespace Identity50.Shared
 		public string Naziv { get; set; }
 
 		public List<Autor> Autori { get; set; } = new List<Autor>();
+		public ICollection<KnjigaAutor> KAs { get; set; }
 
 		public static implicit operator KnjigaMsg(Knjiga k)
 		{
@@ -48,6 +49,7 @@ namespace Identity50.Shared
 		public string Ime { get; set; }
 
 		public List<Knjiga> Knjige { get; set; } = new List<Knjiga>();
+		public ICollection<KnjigaAutor> KAs { get; set; }
 
 		public static implicit operator AutorMsg(Autor a)
 		{
@@ -61,5 +63,16 @@ namespace Identity50.Shared
 			a.Knjige.ToList().ForEach(k => a.Knjige.Add(k));
 			return a;
 		}
+	}
+
+	public class KnjigaAutor
+	{
+		public DateTime Izdata { get; set; }
+
+		public int Autor_FK { get; set; }
+		public Autor Autor { get; set; }
+
+		public int Knjiga_FK { get; set; }
+		public Knjiga Knjiga { get; set; }
 	}
 }

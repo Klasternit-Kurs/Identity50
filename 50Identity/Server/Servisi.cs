@@ -32,18 +32,21 @@ namespace Identity50.Server
 			if (knji == null)
 			{
 				Knjiga knjiga = request;
+				knjiga.Autori = new List<Autor>();
 				List<Autor> aut = new List<Autor>();
 				request.Autori.ToList().ForEach(a =>
 				{
-					var autorBaza = Baza.Autors.Where(au => au.Ime == a.Ime).First();
+					var autorBaza = Baza.Autors.Where(au => au.Ime == a.Ime).FirstOrDefault();
 					if (autorBaza == null)
 						aut.Add(a);
 					else
 						aut.Add(autorBaza);
 				});
-				knjiga.Autori = aut;
-				knji = Baza.Knjigas.Add(knjiga).Entity;
+				//knjiga.Autori = aut;
+				//knji = Baza.Knjigas.Add(knjiga).Entity;
+				Baza.KnjigaAutors.Add(new KnjigaAutor { Knjiga = knjiga, Autor = aut.Last(), Izdata = DateTime.Now });
 				await Baza.SaveChangesAsync();
+				knji = Baza.Knjigas.Find(knjiga.ID);
 			} else
 			{
 				request.Autori.ToList().ForEach(a =>

@@ -4,14 +4,16 @@ using Identity50.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace _50Identity.Server.Migrations
 {
     [DbContext(typeof(DBcon))]
-    partial class DBconModelSnapshot : ModelSnapshot
+    [Migration("20201217164718_novaStvar")]
+    partial class novaStvar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,14 +209,14 @@ namespace _50Identity.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f820999b-696a-4a66-9ee5-7bc7e90faebf",
+                            Id = "b8b71922-6515-43b0-af86-38f470f93445",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ebc4114c-cd59-49c6-b8c1-38ac03de6fc1",
+                            Id = "4a62e054-0f93-4bef-9808-1c8aa4489966",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "User",
                             NormalizedName = "USER"

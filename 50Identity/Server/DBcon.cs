@@ -22,6 +22,8 @@ namespace Identity50.Server
 		public DbSet<Knjiga> Knjigas { get; set; }
 		public DbSet<Autor> Autors { get; set; }
 
+		public DbSet<KnjigaAutor> KnjigaAutors { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
@@ -33,7 +35,17 @@ namespace Identity50.Server
 			builder.Entity<Autor>().HasIndex(a => a.Ime).IsUnique();
 
 			builder.Entity<Knjiga>().HasMany(k => k.Autori)
-									.WithMany(a => a.Knjige);
+									.WithMany(a => a.Knjige)
+									.UsingEntity<KnjigaAutor>
+				(
+					ka => ka.HasOne(ka => ka.Autor)
+							.WithMany(a => a.KAs)
+							.HasForeignKey(ka => ka.Autor_FK),
+					ka => ka.HasOne(ka => ka.Knjiga)
+							.WithMany(k => k.KAs)
+							.HasForeignKey(ka => ka.Knjiga_FK),
+					ka => ka.HasKey(ka => new { ka.Knjiga_FK, ka.Autor_FK})
+				);
 
 			builder.Entity<IdentityRole>().HasData(
 				new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Admin", NormalizedName = "ADMIN", ConcurrencyStamp = "ZKLJ" },
