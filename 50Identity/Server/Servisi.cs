@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using grpcServisi;
+using Identity50.Server.Model;
 using Identity50.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -23,6 +24,29 @@ namespace Identity50.Server
 			_uman = um;
 			_sim = sim;
 			Baza = b;
+		}
+
+
+		public override async Task<EmptyMsg> Upload(IAsyncStreamReader<FajlMsg> requestStream, ServerCallContext context)
+		{
+			_log.LogInformation("Krece prijem");
+			Fajl faa = new Fajl {ID = Guid.NewGuid().ToString() };
+			List<byte> temp = new List<byte>();
+
+			await foreach(FajlMsg f in requestStream.ReadAllAsync())
+			{
+				_log.LogInformation(f.Bajt.ToList().Aggregate("Dobio bajte: ", 
+					(akumulator, b) 
+						=> akumulator += " " + b));
+
+				f.Bajt.ToList().ForEach(b => temp.Add((byte)b));
+			}
+			_log.LogInformation("Snimam u bazu...");
+			faa.Bajti = temp.ToArray();
+			//Baza.Fajls.Add(faa);
+			//Baza.SaveChanges();
+			_log.LogInformation("Sve gotovo");
+			return new EmptyMsg();
 		}
 
 

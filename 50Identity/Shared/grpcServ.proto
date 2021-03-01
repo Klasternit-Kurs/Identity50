@@ -6,6 +6,11 @@ service GrpcIdentity {
 	rpc LogIn (RegMsg) returns (StandardReplyMsg);
 	rpc LogOut (EmptyMsg) returns (EmptyMsg);
 	rpc UnosKnjige (KnjigaMsg) returns (StandardReplyMsg);
+	rpc Upload (stream FajlMsg) returns (EmptyMsg);
+}
+
+message FajlMsg {
+	repeated int32 bajt = 1;
 }
 
 message KnjigaMsg {

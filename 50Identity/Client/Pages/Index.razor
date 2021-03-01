@@ -8,7 +8,8 @@
 		samo za admine
 	</Authorized>
 	<NotAuthorized>
-		Ostali juzeri
+		@context.User.Identity.Name
+			Ostali juzeri
 	</NotAuthorized>
 </AuthorizeView>
 <AuthorizeView>
@@ -31,6 +32,7 @@
 
 	</NotAuthorized>
 </AuthorizeView>
+
 
 @code
 {

@@ -24,9 +24,14 @@ namespace Identity50.Server
 
 		public DbSet<KnjigaAutor> KnjigaAutors { get; set; }
 
+		public DbSet<Model.Fajl> Fajls { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
+
+
+			builder.Entity<Model.Fajl>().HasKey(f => f.ID);
 
 			builder.Entity<Knjiga>().HasKey(k => k.ID);
 			builder.Entity<Autor>().HasKey(a => a.ID);

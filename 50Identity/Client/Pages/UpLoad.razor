@@ -1,0 +1,47 @@
+﻿@page "/fu"
+@using grpcServisi
+@inject grpcServisi.GrpcIdentity.GrpcIdentityClient kli
+
+<InputFile OnChange="Foo">Uppppload</InputFile>
+
+
+@code
+{
+	private int _bajtiSlanje = 5;
+
+	private async void Foo(InputFileChangeEventArgs a)
+	{
+		Console.WriteLine($"Naziv: {a.File.Name} -- Velecina: {a.File.Size}");
+
+		var stream = a.File.OpenReadStream();
+		Console.WriteLine($"r:{stream.CanRead}, s:{stream.CanSeek}, w:{stream.CanWrite}");
+
+		/*byte[] nizBajta = new byte[a.File.Size];
+
+		int broj = await stream.ReadAsync(nizBajta);
+		Console.WriteLine($"Uspesno procitao {broj} bajta, oni su:");
+		nizBajta.ToList().ForEach(b => Console.WriteLine(b));*/
+
+		FajlMsg fajl = new FajlMsg();
+
+		byte[] nizBajta = new byte[a.File.Size];
+		await stream.ReadAsync(nizBajta);
+		using (var grpcStream = kli.Upload())
+		{
+			for (int i = 0; i < nizBajta.Length; i++)
+			{
+				fajl.Bajt.Add(nizBajta[i]);
+				if ((i+1) % (_bajtiSlanje) == 0)
+				{
+					await grpcStream.RequestStream.WriteAsync(fajl);
+					fajl = new FajlMsg();
+				}
+			}
+
+			if (fajl.Bajt.Any())
+				await grpcStream.RequestStream.WriteAsync(fajl);
+			await grpcStream.RequestStream.CompleteAsync();
+			await grpcStream.ResponseAsync;
+		}
+	}
+}
