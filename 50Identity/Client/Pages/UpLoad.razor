@@ -1,19 +1,45 @@
 ﻿@page "/fu"
 @using grpcServisi
+@using Grpc.Core
+@using System.IO
 @inject grpcServisi.GrpcIdentity.GrpcIdentityClient kli
 
 <InputFile OnChange="Foo">Uppppload</InputFile>
+<button @onclick="Down">Download</button>
 
 
 @code
 {
 	private int _bajtiSlanje = 5;
 
+	private async void Down()
+	{
+		Console.WriteLine("Krece metoda");
+		var dwn = kli.Download(new EmptyMsg());
+		List<byte> bajtovi = new List<byte>();
+		await foreach (var ch in dwn.ResponseStream.ReadAllAsync())
+		{
+			ch.Bajt.ToList().ForEach(b => bajtovi.Add((byte)b));
+		}
+
+		Console.WriteLine("Dobio bajtove:");
+		bajtovi.ForEach(b => Console.Write($" {b} "));
+		Console.WriteLine("-----------------------------");
+
+		Console.WriteLine($"Tekst je: {System.Text.Encoding.UTF8.GetString(bajtovi.ToArray())}");
+
+		/*while (await dwn.ResponseStream.MoveNext())
+		{
+			Console.WriteLine(dwn.ResponseStream.Current);
+		}*/
+	}
+
+
 	private async void Foo(InputFileChangeEventArgs a)
 	{
 		Console.WriteLine($"Naziv: {a.File.Name} -- Velecina: {a.File.Size}");
 
-		var stream = a.File.OpenReadStream();
+		var stream = a.File.OpenReadStream(maxAllowedSize:40000000);
 		Console.WriteLine($"r:{stream.CanRead}, s:{stream.CanSeek}, w:{stream.CanWrite}");
 
 		/*byte[] nizBajta = new byte[a.File.Size];
@@ -31,7 +57,7 @@
 			for (int i = 0; i < nizBajta.Length; i++)
 			{
 				fajl.Bajt.Add(nizBajta[i]);
-				if ((i+1) % (_bajtiSlanje) == 0)
+				if ((i + 1) % (_bajtiSlanje) == 0)
 				{
 					await grpcStream.RequestStream.WriteAsync(fajl);
 					fajl = new FajlMsg();

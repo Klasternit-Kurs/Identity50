@@ -49,6 +49,29 @@ namespace Identity50.Server
 			return new EmptyMsg();
 		}
 
+		public override async Task Download(EmptyMsg request, IServerStreamWriter<FajlMsg> responseStream, ServerCallContext context)
+		{
+			_log.LogInformation("Krece metoda");
+			var fajl = Baza.Fajls.First();
+			_log.LogInformation("Krecem sa slanjem");
+			FajlMsg fm = new FajlMsg();
+			for (int i = 0; i < fajl.Bajti.Length; i++)
+			{
+				fm.Bajt.Add(fajl.Bajti[i]);
+				if ((i+1)%10 == 0)
+				{
+					_log.LogInformation("Saljem chunk");
+					await responseStream.WriteAsync(fm);
+					fm = new FajlMsg();
+				}
+			}
+			if (fm.Bajt.Any())
+			{
+				await responseStream.WriteAsync(fm);
+				_log.LogInformation("Saljem chunk");
+			}
+			_log.LogInformation("Zavrsio slanje");
+		}
 
 		public override async Task<StandardReplyMsg> UnosKnjige(KnjigaMsg request, ServerCallContext context)
 		{

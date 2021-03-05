@@ -7,6 +7,7 @@ service GrpcIdentity {
 	rpc LogOut (EmptyMsg) returns (EmptyMsg);
 	rpc UnosKnjige (KnjigaMsg) returns (StandardReplyMsg);
 	rpc Upload (stream FajlMsg) returns (EmptyMsg);
+	rpc Download (EmptyMsg) returns (stream FajlMsg);
 }
 
 message FajlMsg {
