@@ -43,8 +43,8 @@ namespace Identity50.Server
 			}
 			_log.LogInformation("Snimam u bazu...");
 			faa.Bajti = temp.ToArray();
-			//Baza.Fajls.Add(faa);
-			//Baza.SaveChanges();
+			Baza.Fajls.Add(faa);
+			Baza.SaveChanges();
 			_log.LogInformation("Sve gotovo");
 			return new EmptyMsg();
 		}

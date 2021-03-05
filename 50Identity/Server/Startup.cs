@@ -27,7 +27,7 @@ namespace Identity50.Server
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddDbContext<DBcon>(options =>
-				options.UseSqlServer(
+				options.UseNpgsql(
 						Configuration.GetConnectionString("Baza")));
 
 			services.AddIdentity<IdentityUser, IdentityRole>()
