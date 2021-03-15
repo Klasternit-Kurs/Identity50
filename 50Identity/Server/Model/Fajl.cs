@@ -8,6 +8,7 @@ namespace Identity50.Server.Model
     public class Fajl
     {
         public string ID { get; set; }
-        public byte[] Bajti { get; set; }
+        public string Naziv { get; set; }
+        public string Putanja { get; set; }
     }
 }

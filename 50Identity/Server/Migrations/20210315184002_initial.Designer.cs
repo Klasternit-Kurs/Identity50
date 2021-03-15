@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace _50Identity.Server.Migrations
 {
     [DbContext(typeof(DBcon))]
-    [Migration("20210305172925_asd")]
-    partial class asd
+    [Migration("20210315184002_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,8 +26,11 @@ namespace _50Identity.Server.Migrations
                     b.Property<string>("ID")
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("Bajti")
-                        .HasColumnType("bytea");
+                    b.Property<string>("Naziv")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Putanja")
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
@@ -219,14 +222,14 @@ namespace _50Identity.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5860f4c5-f03a-466d-8f59-4d267628709d",
+                            Id = "14153c4d-2614-48f2-ab00-032bd2fba868",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "01ed93eb-a383-40f6-9e05-17aff6671013",
+                            Id = "a9eaeb8b-29ee-4771-b13d-cc6b1f7c5c18",
                             ConcurrencyStamp = "ZKLJ",
                             Name = "User",
                             NormalizedName = "USER"

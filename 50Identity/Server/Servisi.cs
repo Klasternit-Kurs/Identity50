@@ -8,6 +8,8 @@ using Identity50.Server.Model;
 using Identity50.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace Identity50.Server
 {
@@ -17,13 +19,19 @@ namespace Identity50.Server
 		private readonly UserManager<IdentityUser> _uman;
 		private readonly SignInManager<IdentityUser> _sim;
 		private DBcon Baza { get; init; }
+		private readonly IConfiguration _conf;
 
-		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um, SignInManager<IdentityUser> sim, DBcon b)
+		public Servisi(ILogger<Servisi> log, UserManager<IdentityUser> um, SignInManager<IdentityUser> sim, DBcon b,
+			IConfiguration configuration)
 		{
 			_log = log;
 			_uman = um;
 			_sim = sim;
 			Baza = b;
+			_conf = configuration;
+
+			if (!Directory.Exists(_conf["LokacijaFajlova"]))
+				Directory.CreateDirectory(_conf["LokacijaFajlova"]);
 		}
 
 
@@ -35,23 +43,24 @@ namespace Identity50.Server
 
 			await foreach(FajlMsg f in requestStream.ReadAllAsync())
 			{
-				_log.LogInformation(f.Bajt.ToList().Aggregate("Dobio bajte: ", 
-					(akumulator, b) 
-						=> akumulator += " " + b));
-
 				f.Bajt.ToList().ForEach(b => temp.Add((byte)b));
+				faa.Naziv = f.Naziv;
 			}
-			_log.LogInformation("Snimam u bazu...");
-			faa.Bajti = temp.ToArray();
-			Baza.Fajls.Add(faa);
-			Baza.SaveChanges();
+			_log.LogInformation("Snimam u fajl...");
+			faa.Putanja = $"{_conf["LokacijaFajlova"]}/{faa.Naziv}";
+			await File.WriteAllBytesAsync(faa.Putanja, temp.ToArray());
+			if (File.Exists(faa.Putanja))
+			{
+				Baza.Fajls.Add(faa);
+				Baza.SaveChanges();
+			}
 			_log.LogInformation("Sve gotovo");
 			return new EmptyMsg();
 		}
 
 		public override async Task Download(EmptyMsg request, IServerStreamWriter<FajlMsg> responseStream, ServerCallContext context)
 		{
-			_log.LogInformation("Krece metoda");
+			/*_log.LogInformation("Krece metoda");
 			var fajl = Baza.Fajls.First();
 			_log.LogInformation("Krecem sa slanjem");
 			FajlMsg fm = new FajlMsg();
@@ -70,7 +79,7 @@ namespace Identity50.Server
 				await responseStream.WriteAsync(fm);
 				_log.LogInformation("Saljem chunk");
 			}
-			_log.LogInformation("Zavrsio slanje");
+			_log.LogInformation("Zavrsio slanje");*/
 		}
 
 		public override async Task<StandardReplyMsg> UnosKnjige(KnjigaMsg request, ServerCallContext context)

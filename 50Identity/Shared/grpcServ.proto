@@ -11,7 +11,8 @@ service GrpcIdentity {
 }
 
 message FajlMsg {
-	repeated int32 bajt = 1;
+	string Naziv = 1;
+	repeated int32 bajt = 2;
 }
 
 message KnjigaMsg {

@@ -10,7 +10,7 @@
 
 @code
 {
-	private int _bajtiSlanje = 5;
+	private int _bajtiSlanje = 1000;
 
 	private async void Down()
 	{
@@ -49,6 +49,7 @@
 		nizBajta.ToList().ForEach(b => Console.WriteLine(b));*/
 
 		FajlMsg fajl = new FajlMsg();
+		fajl.Naziv = a.File.Name;
 
 		byte[] nizBajta = new byte[a.File.Size];
 		await stream.ReadAsync(nizBajta);
@@ -61,6 +62,7 @@
 				{
 					await grpcStream.RequestStream.WriteAsync(fajl);
 					fajl = new FajlMsg();
+					fajl.Naziv = a.File.Name;
 				}
 			}
 

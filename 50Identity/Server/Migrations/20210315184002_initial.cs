@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace _50Identity.Server.Migrations
 {
-    public partial class asd : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -88,7 +88,8 @@ namespace _50Identity.Server.Migrations
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "text", nullable: false),
-                    Bajti = table.Column<byte[]>(type: "bytea", nullable: true)
+                    Naziv = table.Column<string>(type: "text", nullable: true),
+                    Putanja = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -264,8 +265,8 @@ namespace _50Identity.Server.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "5860f4c5-f03a-466d-8f59-4d267628709d", "ZKLJ", "Admin", "ADMIN" },
-                    { "01ed93eb-a383-40f6-9e05-17aff6671013", "ZKLJ", "User", "USER" }
+                    { "14153c4d-2614-48f2-ab00-032bd2fba868", "ZKLJ", "Admin", "ADMIN" },
+                    { "a9eaeb8b-29ee-4771-b13d-cc6b1f7c5c18", "ZKLJ", "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
