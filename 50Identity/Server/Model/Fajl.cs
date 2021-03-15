@@ -9,6 +9,7 @@ namespace Identity50.Server.Model
     {
         public string ID { get; set; }
         public string Naziv { get; set; }
+        public string Tip { get; set; }
         public string Putanja { get; set; }
     }
 }

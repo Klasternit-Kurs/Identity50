@@ -4,9 +4,13 @@
 @using System.IO
 @inject grpcServisi.GrpcIdentity.GrpcIdentityClient kli
 
-<InputFile OnChange="Foo">Uppppload</InputFile>
+<InputFile OnChange="Foo" multiple>Uppppload</InputFile>
 <button @onclick="Down">Download</button>
 
+@foreach (var sl in _slike)
+{
+	<img src="@sl"/>
+}
 
 @code
 {
@@ -17,59 +21,57 @@
 		Console.WriteLine("Krece metoda");
 		var dwn = kli.Download(new EmptyMsg());
 		List<byte> bajtovi = new List<byte>();
+		string tip = string.Empty;
 		await foreach (var ch in dwn.ResponseStream.ReadAllAsync())
 		{
 			ch.Bajt.ToList().ForEach(b => bajtovi.Add((byte)b));
+			tip = ch.Tip;
 		}
 
-		Console.WriteLine("Dobio bajtove:");
-		bajtovi.ForEach(b => Console.Write($" {b} "));
-		Console.WriteLine("-----------------------------");
-
-		Console.WriteLine($"Tekst je: {System.Text.Encoding.UTF8.GetString(bajtovi.ToArray())}");
-
+		_slike.Add($"data:{tip};base64,{Convert.ToBase64String(bajtovi.ToArray())}");
+		StateHasChanged();
 		/*while (await dwn.ResponseStream.MoveNext())
 		{
 			Console.WriteLine(dwn.ResponseStream.Current);
 		}*/
 	}
 
-
+	public List<string> _slike = new List<string>();
 	private async void Foo(InputFileChangeEventArgs a)
 	{
-		Console.WriteLine($"Naziv: {a.File.Name} -- Velecina: {a.File.Size}");
 
-		var stream = a.File.OpenReadStream(maxAllowedSize:40000000);
-		Console.WriteLine($"r:{stream.CanRead}, s:{stream.CanSeek}, w:{stream.CanWrite}");
-
-		/*byte[] nizBajta = new byte[a.File.Size];
-
-		int broj = await stream.ReadAsync(nizBajta);
-		Console.WriteLine($"Uspesno procitao {broj} bajta, oni su:");
-		nizBajta.ToList().ForEach(b => Console.WriteLine(b));*/
-
-		FajlMsg fajl = new FajlMsg();
-		fajl.Naziv = a.File.Name;
-
-		byte[] nizBajta = new byte[a.File.Size];
-		await stream.ReadAsync(nizBajta);
-		using (var grpcStream = kli.Upload())
+		foreach (IBrowserFile slika in a.GetMultipleFiles(5))
 		{
-			for (int i = 0; i < nizBajta.Length; i++)
+			var resize = await slika.RequestImageFileAsync("image/jpeg", 500, 500);
+			byte[] nizBajta = new byte[resize.Size];
+			await resize.OpenReadStream().ReadAsync(nizBajta);
+
+
+			FajlMsg fajl = new FajlMsg();
+			fajl.Naziv = slika.Name;
+			fajl.Tip = slika.ContentType;
+			using (var grpcStream = kli.Upload())
 			{
-				fajl.Bajt.Add(nizBajta[i]);
-				if ((i + 1) % (_bajtiSlanje) == 0)
+				for (int i = 0; i < nizBajta.Length; i++)
 				{
-					await grpcStream.RequestStream.WriteAsync(fajl);
-					fajl = new FajlMsg();
-					fajl.Naziv = a.File.Name;
+					fajl.Bajt.Add(nizBajta[i]);
+					if ((i + 1) % (_bajtiSlanje) == 0)
+					{
+						await grpcStream.RequestStream.WriteAsync(fajl);
+						fajl = new FajlMsg();
+						fajl.Naziv = slika.Name;
+						fajl.Tip = slika.ContentType;
+					}
 				}
+
+				if (fajl.Bajt.Any())
+					await grpcStream.RequestStream.WriteAsync(fajl);
+				await grpcStream.RequestStream.CompleteAsync();
+				await grpcStream.ResponseAsync;
+
 			}
 
-			if (fajl.Bajt.Any())
-				await grpcStream.RequestStream.WriteAsync(fajl);
-			await grpcStream.RequestStream.CompleteAsync();
-			await grpcStream.ResponseAsync;
 		}
+
 	}
 }

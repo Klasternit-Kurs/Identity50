@@ -45,6 +45,7 @@ namespace Identity50.Server
 			{
 				f.Bajt.ToList().ForEach(b => temp.Add((byte)b));
 				faa.Naziv = f.Naziv;
+				faa.Tip = f.Tip;
 			}
 			_log.LogInformation("Snimam u fajl...");
 			faa.Putanja = $"{_conf["LokacijaFajlova"]}/{faa.Naziv}";
@@ -60,18 +61,26 @@ namespace Identity50.Server
 
 		public override async Task Download(EmptyMsg request, IServerStreamWriter<FajlMsg> responseStream, ServerCallContext context)
 		{
-			/*_log.LogInformation("Krece metoda");
-			var fajl = Baza.Fajls.First();
+			_log.LogInformation("Krece metoda");
+			Random rnd = new Random(Guid.NewGuid().GetHashCode());
+
+
+			var fajl = Baza.Fajls.ToList()[rnd.Next(0, Baza.Fajls.ToList().Count)];
+
 			_log.LogInformation("Krecem sa slanjem");
+			byte [] niz = File.ReadAllBytes(fajl.Putanja);
 			FajlMsg fm = new FajlMsg();
-			for (int i = 0; i < fajl.Bajti.Length; i++)
+			fm.Tip = fajl.Tip;
+			fm.Naziv = fajl.Putanja.Split('/').Last();
+			for (int i = 0; i < niz.Length; i++)
 			{
-				fm.Bajt.Add(fajl.Bajti[i]);
+				fm.Bajt.Add(niz[i]);
 				if ((i+1)%10 == 0)
 				{
-					_log.LogInformation("Saljem chunk");
 					await responseStream.WriteAsync(fm);
 					fm = new FajlMsg();
+					fm.Tip = fajl.Tip;
+					fm.Naziv = fajl.Putanja.Split('/').Last();
 				}
 			}
 			if (fm.Bajt.Any())
@@ -79,7 +88,7 @@ namespace Identity50.Server
 				await responseStream.WriteAsync(fm);
 				_log.LogInformation("Saljem chunk");
 			}
-			_log.LogInformation("Zavrsio slanje");*/
+			_log.LogInformation("Zavrsio slanje");
 		}
 
 		public override async Task<StandardReplyMsg> UnosKnjige(KnjigaMsg request, ServerCallContext context)
