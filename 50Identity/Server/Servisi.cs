@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using Microsoft.Extensions.Configuration;
+using System.Drawing;
 
 namespace Identity50.Server
 {
@@ -40,11 +41,11 @@ namespace Identity50.Server
 			_log.LogInformation("Krece prijem");
 			Fajl faa = new Fajl {ID = Guid.NewGuid().ToString() };
 			List<byte> temp = new List<byte>();
-
+			string guid = Guid.NewGuid().ToString().Substring(0, 4);
 			await foreach(FajlMsg f in requestStream.ReadAllAsync())
 			{
 				f.Bajt.ToList().ForEach(b => temp.Add((byte)b));
-				faa.Naziv = f.Naziv;
+				faa.Naziv = guid + f.Naziv;
 				faa.Tip = f.Tip;
 			}
 			_log.LogInformation("Snimam u fajl...");
@@ -62,33 +63,42 @@ namespace Identity50.Server
 		public override async Task Download(EmptyMsg request, IServerStreamWriter<FajlMsg> responseStream, ServerCallContext context)
 		{
 			_log.LogInformation("Krece metoda");
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
+			//Random rnd = new Random(Guid.NewGuid().GetHashCode());
 
 
-			var fajl = Baza.Fajls.ToList()[rnd.Next(0, Baza.Fajls.ToList().Count)];
+			//var fajl = Baza.Fajls.ToList()[rnd.Next(0, Baza.Fajls.ToList().Count)];
 
-			_log.LogInformation("Krecem sa slanjem");
-			byte [] niz = File.ReadAllBytes(fajl.Putanja);
-			FajlMsg fm = new FajlMsg();
-			fm.Tip = fajl.Tip;
-			fm.Naziv = fajl.Putanja.Split('/').Last();
-			for (int i = 0; i < niz.Length; i++)
+			foreach (var fajl in Baza.Fajls.ToList())
 			{
-				fm.Bajt.Add(niz[i]);
-				if ((i+1)%10 == 0)
+				using (var memStream = new MemoryStream())
 				{
-					await responseStream.WriteAsync(fm);
-					fm = new FajlMsg();
+					Image thumb = new Bitmap(fajl.Putanja)
+						.GetThumbnailImage(100, 100, null, IntPtr.Zero);
+					thumb.Save(memStream, System.Drawing.Imaging.ImageFormat.Jpeg);
+					byte[] niz = memStream.ToArray();
+					_log.LogInformation("Krecem sa slanjem");
+					FajlMsg fm = new FajlMsg();
 					fm.Tip = fajl.Tip;
 					fm.Naziv = fajl.Putanja.Split('/').Last();
+					for (int i = 0; i < niz.Length; i++)
+					{
+						fm.Bajt.Add(niz[i]);
+						if ((i + 1) % int.Parse(_conf["BajtovaPoChunku"]) == 0)
+						{
+							await responseStream.WriteAsync(fm);
+							fm = new FajlMsg();
+							fm.Tip = fajl.Tip;
+							fm.Naziv = fajl.Putanja.Split('/').Last();
+						}
+					}
+					if (fm.Bajt.Any())
+					{
+						await responseStream.WriteAsync(fm);
+						_log.LogInformation("Saljem chunk");
+					}
+					_log.LogInformation("Zavrsio slanje");
 				}
 			}
-			if (fm.Bajt.Any())
-			{
-				await responseStream.WriteAsync(fm);
-				_log.LogInformation("Saljem chunk");
-			}
-			_log.LogInformation("Zavrsio slanje");
 		}
 
 		public override async Task<StandardReplyMsg> UnosKnjige(KnjigaMsg request, ServerCallContext context)

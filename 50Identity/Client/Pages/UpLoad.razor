@@ -3,18 +3,50 @@
 @using Grpc.Core
 @using System.IO
 @inject grpcServisi.GrpcIdentity.GrpcIdentityClient kli
-
-<InputFile OnChange="Foo" multiple>Uppppload</InputFile>
-<button @onclick="Down">Download</button>
-
-@foreach (var sl in _slike)
-{
-	<img src="@sl"/>
-}
+<div class="container">
+	<InputFile OnChange="Foo" multiple>Uppppload</InputFile>
+	<button @onclick="Down">Download</button>
+	<button @onclick="tableTest">Tabela</button>
+</div>
+<div>
+	@((MarkupString)_tabela)
+</div>
+<div>
+	<b @onclick="VelikaSlika">Nesto ovde</b>
+	@if (!string.IsNullOrEmpty(_slika))
+	{
+		<img src="_slika"/>
+	}
+</div>
 
 @code
 {
 	private int _bajtiSlanje = 1000;
+	private string _tabela = string.Empty;
+	public List<string> _slike = new List<string>();
+	private string _slika = string.Empty;
+
+	private void tableTest()
+	{
+		_tabela += "<table><tr>";
+
+		foreach(var nesto in _slike.Select((value, index) => new { value, index}))
+		{
+			_tabela += $"<td><a @onclick='VelikaSlika'><img src='{ nesto.value}' /></a></td>";
+			if ((nesto.index + 1) % 3 == 0)
+				_tabela += "</tr><tr>";
+		}
+
+		_tabela += "</tr></table>";
+		Console.WriteLine(_tabela);
+		StateHasChanged();
+	}
+
+	private void VelikaSlika()
+	{
+		Console.WriteLine("Tu sammmm");
+	}
+
 
 	private async void Down()
 	{
@@ -22,13 +54,22 @@
 		var dwn = kli.Download(new EmptyMsg());
 		List<byte> bajtovi = new List<byte>();
 		string tip = string.Empty;
+		string naziv = string.Empty;
 		await foreach (var ch in dwn.ResponseStream.ReadAllAsync())
 		{
+			if (naziv == string.Empty || ch.Naziv != naziv)
+			{
+				if (bajtovi.Any())
+				{
+					_slike.Add($"data:{tip};base64,{Convert.ToBase64String(bajtovi.ToArray())}");
+					bajtovi.Clear();
+				}
+				naziv = ch.Naziv;
+			}
 			ch.Bajt.ToList().ForEach(b => bajtovi.Add((byte)b));
-			tip = ch.Tip;
 		}
-
 		_slike.Add($"data:{tip};base64,{Convert.ToBase64String(bajtovi.ToArray())}");
+
 		StateHasChanged();
 		/*while (await dwn.ResponseStream.MoveNext())
 		{
@@ -36,16 +77,15 @@
 		}*/
 	}
 
-	public List<string> _slike = new List<string>();
+
 	private async void Foo(InputFileChangeEventArgs a)
 	{
 
 		foreach (IBrowserFile slika in a.GetMultipleFiles(5))
 		{
-			var resize = await slika.RequestImageFileAsync("image/jpeg", 500, 500);
+			var resize = await slika.RequestImageFileAsync("image/jpeg", 1000, 1000);
 			byte[] nizBajta = new byte[resize.Size];
 			await resize.OpenReadStream().ReadAsync(nizBajta);
-
 
 			FajlMsg fajl = new FajlMsg();
 			fajl.Naziv = slika.Name;
